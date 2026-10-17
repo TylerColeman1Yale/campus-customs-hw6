@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,7 +49,10 @@ def _agent(defenses: bool, cache_key: str | None = None) -> Agent:
     settings = {'openai_reasoning_effort': 'none'}
     if cache_key:
         settings['openai_prompt_cache_key'] = cache_key
-    a = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=VendorDecision, model_settings=settings)
+    system_prompt = SYSTEM_PROMPT
+    if cache_key and cache_key.startswith('no-cache-'):
+        system_prompt += f'\nCache-isolation nonce: {uuid.uuid4().hex}\n'
+    a = Agent(model, system_prompt=system_prompt, output_type=VendorDecision, model_settings=settings)
 
     @a.tool
     def read_vendor_document(ctx: RunContext[None], path: str) -> str:
