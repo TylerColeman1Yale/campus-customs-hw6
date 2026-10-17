@@ -42,10 +42,13 @@ def enforce_policy(answer: VendorDecision) -> VendorDecision:
     return answer
 
 
-def _agent(defenses: bool) -> Agent:
+def _agent(defenses: bool, cache_key: str | None = None) -> Agent:
     client = AsyncOpenAI(api_key=os.environ['PORTKEY_API_KEY'], base_url='https://api.portkey.ai/v1', default_headers={'x-portkey-provider': 'openai'})
     model = OpenAIChatModel(MODEL, provider=OpenAIProvider(openai_client=client))
-    a = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=VendorDecision, model_settings={'openai_reasoning_effort': 'none'})
+    settings = {'openai_reasoning_effort': 'none'}
+    if cache_key:
+        settings['openai_prompt_cache_key'] = cache_key
+    a = Agent(model, system_prompt=SYSTEM_PROMPT, output_type=VendorDecision, model_settings=settings)
 
     @a.tool
     def read_vendor_document(ctx: RunContext[None], path: str) -> str:
@@ -83,7 +86,8 @@ def _cost(usage):
 
 
 async def run_document(path: str, defenses: bool = True, setup: str = 'defended') -> dict:
-    agent = _agent(defenses)
+    cache_key = 'campus-customs-handbook-v1' if setup == 'with_cache' else ('no-cache-' + path) if setup == 'without_cache' else None
+    agent = _agent(defenses, cache_key)
     prompt = f'Analyze vendor document at this path: {path}. Use the document-reading tool, then return the structured decision.'
     result = await agent.run(prompt)
     if defenses:
