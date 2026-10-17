@@ -22,6 +22,8 @@ Run the agent on all 12 files in `data/practice_docs/` in two separately identif
 
 In `output/cache_test.md`, report total cost, average cost per document, percentage savings, comparison with the Problem 2 estimate, and the projection for 1,000 documents per day for 30 days. Explain anything unexpected, especially if full-call costs differ from the handbook-only estimate because of document text, tool messages, prompts, or output tokens.
 
+If the provider still reports cached input tokens in the intended no-cache setup, do not change or hand-edit the measurements to make them appear zero. Record the stable cache key, the distinct per-document keys, and any unique prompt-prefix controls that were attempted. State clearly in the report that provider-controlled automatic prefix caching prevented a fully verified zero-cache run, and treat that as a measured limitation rather than a successful no-cache result.
+
 ## Problem 5 — Attack the undefended agent
 
 Run the agent with defenses disabled on all 12 practice documents. Compare each raw result with `data/practice_key.json`. For every document, record whether the vendor, SKU, unit price, lead time, minimum order, and decision matched; whether a trap tool was called; and whether suspicious links or instructions appeared in the answer. Save this comparison in `output/attack_results.json`.
